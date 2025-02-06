@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/auula/wiredkv/types"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type Kind int8
@@ -98,7 +99,17 @@ func (s *Segment) ToSet() *types.Set {
 	}
 	// 假设您的数据是 JSON 或某种结构体，可以进行反序列化
 	var set types.Set
-	// Deserialize s.data to set (具体根据类型定义来做反序列化)
+	// 解码存储的二进制数据
+	decodedData, err := transformer.Decode(s.Value)
+	if err != nil {
+		return nil
+	}
+	// 反序列化成 Set 结构
+	err = bson.Unmarshal(decodedData, &set)
+	if err != nil {
+		return nil
+	}
+
 	return &set
 }
 
