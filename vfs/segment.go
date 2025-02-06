@@ -93,24 +93,23 @@ func (s *Segment) Size() uint32 {
 	return 26 + s.KeySize + s.ValueSize + 4
 }
 
-func (s *Segment) ToSet() *types.Set {
+func (s *Segment) ToSet() (*types.Set, error) {
 	if s.Type != Set {
-		return nil
+		return nil, fmt.Errorf("")
 	}
 	// 假设您的数据是 JSON 或某种结构体，可以进行反序列化
 	var set types.Set
 	// 解码存储的二进制数据
 	decodedData, err := transformer.Decode(s.Value)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	// 反序列化成 Set 结构
 	err = bson.Unmarshal(decodedData, &set)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-
-	return &set
+	return &set, err
 }
 
 func (s *Segment) ToZSet() *types.ZSet {
