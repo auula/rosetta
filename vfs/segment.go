@@ -109,7 +109,7 @@ func (s *Segment) ToSet() (*types.Set, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &set, err
+	return &set, nil
 }
 
 func (s *Segment) ToZSet() *types.ZSet {
