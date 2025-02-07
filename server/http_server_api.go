@@ -18,7 +18,7 @@ var (
 	root         *mux.Router
 	authPassword string
 	allowIpList  []string
-	allowMethod  = []string{"GET", "POST", "DELETE", "PUT"}
+	allowMethod  = []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete}
 )
 
 // http://192.168.101.225:2468/{types}/{key}
@@ -28,7 +28,8 @@ var (
 
 func init() {
 	root = mux.NewRouter()
-	root.HandleFunc("/", action).Methods(allowMethod...)
+	root.HandleFunc("/", statusController).Methods(allowMethod...)
+	root.HandleFunc("/{type}/{key}", storageController).Methods(allowMethod...)
 	root.Use(authMiddleware)
 }
 
@@ -37,6 +38,35 @@ type ResponseBody struct {
 	Time    string        `json:"time,omitempty"`
 	Result  []interface{} `json:"result,omitempty"`
 	Message string        `json:"message,omitempty"`
+}
+
+func statusController(w http.ResponseWriter, r *http.Request) {}
+
+func storageController(w http.ResponseWriter, r *http.Request) {
+	tables := []interface{}{
+		types.Tables{},
+		types.Tables{},
+	}
+
+	vars := mux.Vars(r)
+	keyParam := vars["key"]
+	typeParam := vars["type"]
+
+	fmt.Printf("Key: %s\n", keyParam)
+	fmt.Printf("Types: %s\n", typeParam)
+
+	switch r.Method {
+	case http.MethodGet:
+		okResponse(w, http.StatusOK, tables, "request processed successfully!")
+	case http.MethodPut:
+		okResponse(w, http.StatusOK, tables, "request processed successfully!")
+	case http.MethodPost:
+		okResponse(w, http.StatusOK, tables, "request processed successfully!")
+	case http.MethodDelete:
+		okResponse(w, http.StatusOK, tables, "request processed successfully!")
+	default:
+		methodNotAllowedResponse(w, "HTTP Protocol Method Not Allowed!")
+	}
 }
 
 func okResponse(w http.ResponseWriter, code int, result []interface{}, message string) {
@@ -56,14 +86,6 @@ func okResponse(w http.ResponseWriter, code int, result []interface{}, message s
 	}
 }
 
-func action(w http.ResponseWriter, r *http.Request) {
-	tables := []interface{}{
-		types.Tables{},
-		types.Tables{},
-	}
-	okResponse(w, http.StatusOK, tables, "request processed successfully!")
-}
-
 func unauthorizedResponse(w http.ResponseWriter, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Server", version)
@@ -71,6 +93,22 @@ func unauthorizedResponse(w http.ResponseWriter, message string) {
 
 	resp := ResponseBody{
 		Code:    http.StatusUnauthorized,
+		Time:    time.Now().Format(time.RFC3339Nano),
+		Message: message,
+	}
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		clog.Error(err)
+	}
+}
+
+func methodNotAllowedResponse(w http.ResponseWriter, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Server", version)
+	w.WriteHeader(http.StatusUnauthorized)
+
+	resp := ResponseBody{
+		Code:    http.StatusMethodNotAllowed,
 		Time:    time.Now().Format(time.RFC3339Nano),
 		Message: message,
 	}

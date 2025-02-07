@@ -84,10 +84,10 @@ type LogStructuredFS struct {
 }
 
 // PutSegment inserts a Segment record into the LogStructuredFS virtual file system.
-func (lfs *LogStructuredFS) PutSegment(key string, seg Segment) error {
+func (lfs *LogStructuredFS) PutSegment(key string, seg *Segment) error {
 	inum := InodeNum(key)
 	// Append data to the active region with a lock.
-	err := appendDataWithLock(&lfs.mu, lfs.active, &seg)
+	err := appendDataWithLock(&lfs.mu, lfs.active, seg)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (lfs *LogStructuredFS) FetchSegment(key string) (*Segment, error) {
 	}
 
 	// Check if the inode is expired
-	if inode.ExpiredAt <= uint64(time.Now().Unix()) {
+	if inode.ExpiredAt <= uint64(time.Now().Unix()) && inode.ExpiredAt != 0 {
 		imap.mu.Lock()
 		delete(imap.index, inum)
 		imap.mu.Unlock()
@@ -1011,7 +1011,7 @@ func (lfs *LogStructuredFS) compressDirtyRegion() error {
 					imap.mu.RUnlock()
 
 					if !ok {
-						return fmt.Errorf("index not found for inum = %d: %w", inum, err)
+						continue
 					}
 
 					if isValid(segment, inode) {

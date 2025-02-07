@@ -35,7 +35,7 @@ type Segment struct {
 }
 
 type Serializable interface {
-	ToBSON() []byte
+	ToBSON() ([]byte, error)
 }
 
 // NewSegment 使用数据类型初始化并返回对应的 Segment
@@ -50,8 +50,13 @@ func NewSegment(key string, data Serializable, ttl uint64) (*Segment, error) {
 		expiredAt = uint64(time.Now().Add(time.Second * time.Duration(ttl)).Unix())
 	}
 
+	bytes, err := data.ToBSON()
+	if err != nil {
+		return nil, err
+	}
+
 	// 这个是通过 transformer 编码之后的
-	encodedata, err := transformer.Encode(data.ToBSON())
+	encodedata, err := transformer.Encode(bytes)
 	if err != nil {
 		return nil, fmt.Errorf("transformer encode: %w", err)
 	}
@@ -95,45 +100,86 @@ func (s *Segment) Size() uint32 {
 
 func (s *Segment) ToSet() (*types.Set, error) {
 	if s.Type != Set {
-		return nil, fmt.Errorf("")
+		return nil, fmt.Errorf("not support conversion to set type")
 	}
-	// 假设您的数据是 JSON 或某种结构体，可以进行反序列化
 	var set types.Set
-	// 解码存储的二进制数据
-	decodedData, err := transformer.Decode(s.Value)
-	if err != nil {
-		return nil, err
-	}
-	// 反序列化成 Set 结构
-	err = bson.Unmarshal(decodedData, &set)
+	err := bson.Unmarshal(s.Value, &set)
 	if err != nil {
 		return nil, err
 	}
 	return &set, nil
 }
 
-func (s *Segment) ToZSet() *types.ZSet {
-	return nil
+func (s *Segment) ToZSet() (*types.ZSet, error) {
+	if s.Type != ZSet {
+		return nil, fmt.Errorf("not support conversion to zset type")
+	}
+	var zset types.ZSet
+	err := bson.Unmarshal(s.Value, &zset)
+	if err != nil {
+		return nil, err
+	}
+	return &zset, nil
 }
 
-func (s *Segment) ToText() *types.Text {
-	return nil
+func (s *Segment) ToText() (*types.Text, error) {
+	if s.Type != Text {
+		return nil, fmt.Errorf("not support conversion to text type")
+	}
+	var text types.Text
+	err := bson.Unmarshal(s.Value, &text)
+	if err != nil {
+		return nil, err
+	}
+	return &text, nil
 }
 
-func (s *Segment) ToList() *types.List {
-	return nil
+func (s *Segment) ToList() (*types.List, error) {
+	if s.Type != List {
+		return nil, fmt.Errorf("not support conversion to list type")
+	}
+	var list types.List
+	err := bson.Unmarshal(s.Value, &list)
+	if err != nil {
+		return nil, err
+	}
+	return &list, nil
 }
 
-func (s *Segment) ToTables() *types.Tables {
-	return nil
+func (s *Segment) ToTables() (*types.Tables, error) {
+	if s.Type != Tables {
+		return nil, fmt.Errorf("not support conversion to tables type")
+	}
+	var tables types.Tables
+	err := bson.Unmarshal(s.Value, &tables)
+	if err != nil {
+		return nil, err
+	}
+	return &tables, nil
 }
 
-func (s *Segment) ToBinary() *types.Binary {
-	return nil
+func (s *Segment) ToBinary() (*types.Binary, error) {
+	if s.Type != Binary {
+		return nil, fmt.Errorf("not support conversion to binary type")
+	}
+	var bin types.Binary
+	err := bson.Unmarshal(s.Value, &bin)
+	if err != nil {
+		return nil, err
+	}
+	return &bin, nil
 }
 
-func (s *Segment) ToNumber() *types.Number {
-	return nil
+func (s *Segment) ToNumber() (*types.Number, error) {
+	if s.Type != Number {
+		return nil, fmt.Errorf("not support conversion to number type")
+	}
+	var number types.Number
+	err := bson.Unmarshal(s.Value, &number)
+	if err != nil {
+		return nil, err
+	}
+	return &number, nil
 }
 
 func (s *Segment) TTL() int64 {
