@@ -58,6 +58,13 @@ func tablesController(w http.ResponseWriter, r *http.Request) {
 		}
 		okResponse(w, http.StatusOK, table, "request processed successfully!")
 	case http.MethodPut:
+		// 解析 PUT 请求中的 JSON 数据
+		var tables types.Tables
+		err := json.NewDecoder(r.Body).Decode(&tables)
+		if err != nil {
+			okResponse(w, http.StatusBadRequest, nil, "无效的请求体，JSON 格式错误")
+			return
+		}
 		okResponse(w, http.StatusOK, tables, "request processed successfully!")
 	case http.MethodPost:
 		okResponse(w, http.StatusOK, tables, "request processed successfully!")
