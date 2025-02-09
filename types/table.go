@@ -1,7 +1,11 @@
 package types
 
-type Tables struct{}
+import "gopkg.in/mgo.v2/bson"
 
-func (tab *Tables) ToBSON() ([]byte, error) {
-	return nil, nil
+type Tables struct {
+	Hash map[string]interface{}
+}
+
+func (tab Tables) ToBSON() ([]byte, error) {
+	return bson.Marshal(tab)
 }

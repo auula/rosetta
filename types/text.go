@@ -6,6 +6,6 @@ type Text struct {
 	Content string
 }
 
-func (text *Text) ToBSON() ([]byte, error) {
+func (text Text) ToBSON() ([]byte, error) {
 	return bson.Marshal(text)
 }

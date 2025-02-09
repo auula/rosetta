@@ -8,6 +8,7 @@ import (
 
 	"github.com/auula/wiredkv/clog"
 	"github.com/auula/wiredkv/types"
+	"github.com/auula/wiredkv/vfs"
 	"github.com/gorilla/mux"
 )
 
@@ -65,7 +66,17 @@ func tablesController(w http.ResponseWriter, r *http.Request) {
 			okResponse(w, http.StatusBadRequest, nil, "无效的请求体，JSON 格式错误")
 			return
 		}
-		okResponse(w, http.StatusOK, tables, "request processed successfully!")
+		seg, err := vfs.NewSegment(keyParam, tables, 0)
+		if err != nil {
+			okResponse(w, http.StatusBadRequest, nil, "无效的请求体，JSON 格式错误")
+			return
+		}
+		err = storage.PutSegment(keyParam, seg)
+		if err != nil {
+			okResponse(w, http.StatusBadRequest, nil, "无效的请求体，JSON 格式错误")
+			return
+		}
+		okResponse(w, http.StatusOK, nil, "request processed successfully!")
 	case http.MethodPost:
 		okResponse(w, http.StatusOK, nil, "request processed successfully!")
 	case http.MethodDelete:
