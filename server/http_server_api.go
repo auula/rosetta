@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/auula/wiredkv/clog"
 	"github.com/auula/wiredkv/types"
@@ -29,35 +28,35 @@ var (
 func init() {
 	root = mux.NewRouter()
 	root.HandleFunc("/", statusController).Methods(allowMethod...)
-	root.HandleFunc("/{type}/{key}", storageController).Methods(allowMethod...)
+	root.HandleFunc("/tables/{key}", tablesController).Methods(allowMethod...)
 	root.Use(authMiddleware)
 }
 
 type ResponseBody struct {
-	Code    int           `json:"code"`
-	Time    string        `json:"time,omitempty"`
-	Result  []interface{} `json:"result,omitempty"`
-	Message string        `json:"message,omitempty"`
+	Code    int         `json:"code"`
+	Result  interface{} `json:"result,omitempty"`
+	Message string      `json:"message,omitempty"`
 }
 
 func statusController(w http.ResponseWriter, r *http.Request) {}
 
-func storageController(w http.ResponseWriter, r *http.Request) {
+func tablesController(w http.ResponseWriter, r *http.Request) {
 	tables := []interface{}{
 		types.Tables{},
 		types.Tables{},
 	}
 
-	vars := mux.Vars(r)
-	keyParam := vars["key"]
-	typeParam := vars["type"]
-
-	fmt.Printf("Key: %s\n", keyParam)
-	fmt.Printf("Types: %s\n", typeParam)
-
 	switch r.Method {
 	case http.MethodGet:
-		okResponse(w, http.StatusOK, tables, "request processed successfully!")
+		seg, err := storage.FetchSegment(mux.Vars(r)["key"])
+		if err != nil {
+
+		}
+		table, err := seg.ToTables()
+		if err != nil {
+
+		}
+		okResponse(w, http.StatusOK, table, "request processed successfully!")
 	case http.MethodPut:
 		okResponse(w, http.StatusOK, tables, "request processed successfully!")
 	case http.MethodPost:
@@ -69,14 +68,13 @@ func storageController(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func okResponse(w http.ResponseWriter, code int, result []interface{}, message string) {
+func okResponse(w http.ResponseWriter, code int, result interface{}, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Server", version)
 	w.WriteHeader(code)
 
 	resp := ResponseBody{
 		Code:    code,
-		Time:    time.Now().Format(time.RFC3339Nano),
 		Result:  result,
 		Message: message,
 	}
@@ -93,7 +91,6 @@ func unauthorizedResponse(w http.ResponseWriter, message string) {
 
 	resp := ResponseBody{
 		Code:    http.StatusUnauthorized,
-		Time:    time.Now().Format(time.RFC3339Nano),
 		Message: message,
 	}
 
@@ -109,7 +106,6 @@ func methodNotAllowedResponse(w http.ResponseWriter, message string) {
 
 	resp := ResponseBody{
 		Code:    http.StatusMethodNotAllowed,
-		Time:    time.Now().Format(time.RFC3339Nano),
 		Message: message,
 	}
 
