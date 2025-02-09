@@ -41,14 +41,15 @@ type ResponseBody struct {
 func statusController(w http.ResponseWriter, r *http.Request) {}
 
 func tablesController(w http.ResponseWriter, r *http.Request) {
-	tables := []interface{}{
-		types.Tables{},
-		types.Tables{},
+	keyParam, ok := mux.Vars(r)["key"]
+	if !ok || keyParam == "" {
+		okResponse(w, http.StatusBadRequest, nil, "缺少必要的参数 key")
+		return
 	}
 
 	switch r.Method {
 	case http.MethodGet:
-		seg, err := storage.FetchSegment(mux.Vars(r)["key"])
+		seg, err := storage.FetchSegment(keyParam)
 		if err != nil {
 
 		}
@@ -72,6 +73,7 @@ func tablesController(w http.ResponseWriter, r *http.Request) {
 	default:
 		methodNotAllowedResponse(w, "HTTP Protocol Method Not Allowed!")
 	}
+
 }
 
 func okResponse(w http.ResponseWriter, code int, result interface{}, message string) {
