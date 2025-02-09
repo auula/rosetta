@@ -58,7 +58,6 @@ func tablesController(w http.ResponseWriter, r *http.Request) {
 		}
 		okResponse(w, http.StatusOK, table, "request processed successfully!")
 	case http.MethodPut:
-		// 解析 PUT 请求中的 JSON 数据
 		var tables types.Tables
 		err := json.NewDecoder(r.Body).Decode(&tables)
 		if err != nil {
