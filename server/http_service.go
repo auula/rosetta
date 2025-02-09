@@ -66,9 +66,9 @@ func tablesController(w http.ResponseWriter, r *http.Request) {
 		}
 		okResponse(w, http.StatusOK, tables, "request processed successfully!")
 	case http.MethodPost:
-		okResponse(w, http.StatusOK, tables, "request processed successfully!")
+		okResponse(w, http.StatusOK, nil, "request processed successfully!")
 	case http.MethodDelete:
-		okResponse(w, http.StatusOK, tables, "request processed successfully!")
+		okResponse(w, http.StatusOK, nil, "request processed successfully!")
 	default:
 		methodNotAllowedResponse(w, "HTTP Protocol Method Not Allowed!")
 	}
