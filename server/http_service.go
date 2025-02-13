@@ -95,13 +95,13 @@ func tablesController(w http.ResponseWriter, r *http.Request) {
 		seg, err := storage.FetchSegment(key)
 		if err != nil {
 			okResponse(w, http.StatusInternalServerError, nil, err.Error())
-			clog.Errorf("HTTP server tables controller: %s", err)
+			clog.Errorf("HTTP server tables controller GET: %s", err)
 			return
 		}
 		table, err := seg.ToTables()
 		if err != nil {
 			okResponse(w, http.StatusInternalServerError, nil, err.Error())
-			clog.Errorf("HTTP server tables controller: %s", err)
+			clog.Errorf("HTTP server tables controller GET: %s", err)
 			return
 		}
 		okResponse(w, http.StatusOK, table, "")
@@ -110,19 +110,19 @@ func tablesController(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&tables)
 		if err != nil {
 			okResponse(w, http.StatusInternalServerError, nil, err.Error())
-			clog.Errorf("HTTP server tables controller: %s", err)
+			clog.Errorf("HTTP server tables controller PUT: %s", err)
 			return
 		}
 		seg, err := vfs.NewSegment(key, tables, tables.TTL)
 		if err != nil {
 			okResponse(w, http.StatusInternalServerError, nil, err.Error())
-			clog.Errorf("HTTP server tables controller: %s", err)
+			clog.Errorf("HTTP server tables controller PUT: %s", err)
 			return
 		}
 		err = storage.PutSegment(key, seg)
 		if err != nil {
 			okResponse(w, http.StatusInternalServerError, nil, err.Error())
-			clog.Errorf("HTTP server tables controller: %s", err)
+			clog.Errorf("HTTP server tables controller PUT: %s", err)
 			return
 		}
 		okResponse(w, http.StatusOK, nil, "request processed successfully!")
@@ -132,7 +132,7 @@ func tablesController(w http.ResponseWriter, r *http.Request) {
 		err := storage.DeleteSegment(key)
 		if err != nil {
 			okResponse(w, http.StatusInternalServerError, nil, err.Error())
-			clog.Errorf("HTTP server tables controller: %s", err)
+			clog.Errorf("HTTP server tables controller DEL: %s", err)
 			return
 		}
 		okResponse(w, http.StatusOK, nil, "delete data successfully!")

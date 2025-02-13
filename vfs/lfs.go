@@ -152,7 +152,7 @@ func (lfs *LogStructuredFS) DeleteSegment(key string) error {
 	delete(imap.index, inum)
 	imap.mu.Unlock()
 
-	seg := NewTombstoneSegment([]byte(key))
+	seg := NewTombstoneSegment(key)
 	err := appendDataWithLock(&lfs.mu, lfs.active, seg)
 	if err != nil {
 		return err
@@ -1100,7 +1100,7 @@ func (lfs *LogStructuredFS) compressDirtyRegion() error {
 func isValid(seg *Segment, inode *INode) bool {
 	return !seg.IsTombstone() &&
 		seg.CreatedAt == inode.CreatedAt &&
-		(uint64(time.Now().Unix()) < seg.ExpiredAt && seg.ExpiredAt != 0)
+		(seg.ExpiredAt == 0 || uint64(time.Now().Unix()) < seg.ExpiredAt)
 }
 
 // Start serializing little-endian data, needs to compress seg before writing.
