@@ -34,7 +34,7 @@ const (
 		},
 		"encryptor": {
 			"enable": false,
-			"secret": "your-static-data-secret"
+			"secret": "your-static-data-secret!"
 		},
 		"compressor": {
 			"enable": false

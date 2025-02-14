@@ -173,15 +173,16 @@ func authMiddleware(next http.Handler) http.Handler {
 		}
 
 		// 检查 IP 白名单
-		isAllowedIP := false
+		isAllowedIP := true
 		if len(allowIpList) > 0 {
 			for _, allowedIP := range allowIpList {
-				if strings.Split(ip, ":")[0] == allowedIP {
-					isAllowedIP = true
+				if strings.Split(ip, ":")[0] != allowedIP {
+					isAllowedIP = false
 					break
 				}
 			}
 		}
+
 		if !isAllowedIP {
 			clog.Warnf("Unauthorized IP address: %s", ip)
 			okResponse(w, http.StatusUnauthorized, nil, fmt.Sprintf("Your IP %s is not allowed!", ip))
