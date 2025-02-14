@@ -45,7 +45,7 @@ var (
 	fileExtension    = ".wdb"
 	indexFileName    = "index.wdb"
 	regionThreshold  = int64(1 * GB) // 1GB
-	dataFileMetadata = []byte{0xDB, 0x0, 0x0, 0x1}
+	dataFileMetadata = []byte{0x01, 0x01, 0x00, 0xDB}
 	transformer      = NewTransformer()
 )
 
@@ -460,7 +460,7 @@ func OpenFS(opt *Options) (*LogStructuredFS, error) {
 	for i := 0; i < indexShard; i++ {
 		instance.indexs[i] = &indexMap{
 			mu:    sync.RWMutex{},
-			index: make(map[uint64]*INode, 100000),
+			index: make(map[uint64]*INode, 1e6),
 		}
 	}
 
