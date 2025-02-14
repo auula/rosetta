@@ -496,6 +496,10 @@ func (lfs *LogStructuredFS) CloseFS() error {
 	return lfs.ExportSnapshotIndex()
 }
 
+func (lfs *LogStructuredFS) GetDirectory() string {
+	return lfs.directory
+}
+
 // ExportSnapshotIndex is the operation performed during a normal program exit.
 // exporting the in-memory index snapshot to a file on disk.
 // The current design has limitations for systems with low memory resources,
